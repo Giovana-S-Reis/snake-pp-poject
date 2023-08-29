@@ -6,7 +6,7 @@ import Graphics.Gloss.Interface.Pure.Game
 import Debug.Trace
 
 window :: Display
-window = InWindow "Cobraskell" (1300, 640) (700, -50)
+window = InWindow "Cobraskell" (1280, 720) (700, -50)
 
 background :: Color
 background = white
@@ -32,11 +32,11 @@ instrucoes = pictures $ [translate (-480) (-25) seta]
                      ++ [translate (-195) (300) (scale 0.1 0.1 $ color (greyN 0.5) $ Text "Mova a Cobraskell para que ela encontre a comida e se alimente")]
 
 render :: GameState -> Picture
-render gameState = pictures $   [ fillRectangle black (16, 0) (640, 20)
-                                , fillRectangle black (16, 24) (640, 20)
-                                , fillRectangle black (0, 12) (20, 480)
-                                , fillRectangle black (32, 12) (20, 480) ]
-                                  ++ fmap (convertToPicture black) snake 
+render gameState = pictures $   [ fillRectangle black (16, 0) (660, 20)
+                                , fillRectangle black (16, 24) (660, 20)
+                                , fillRectangle black (0, 12) (20, 500)
+                                , fillRectangle black (32, 12) (20, 500) ]
+                                  ++ fmap (convertToPicture red) snake 
                                   ++ fmap (convertToPicture blue) [food]
                                   ++ gameOverPicture
                                   ++ [instrucoes]
@@ -57,7 +57,7 @@ render gameState = pictures $   [ fillRectangle black (16, 0) (640, 20)
                        , color blue $
                          translate (-175) (-10) $
                          scale 0.2 0.2 $
-                         text ("Pontuação: " ++ show (getScore gameState))
+                         text ("Pontuacao: " ++ show (getScore gameState))
                        , color blue $
                          translate (-175) (-60) $
                          scale 0.2 0.2 $
@@ -67,7 +67,7 @@ render gameState = pictures $   [ fillRectangle black (16, 0) (640, 20)
                          scale 0.2 0.2 $
                          text "barra de espaco"
 					   , color blue $
-                         translate (-175) (-110) $
+                         translate (-175) (-120) $
                          scale 0.2 0.2 $
                          text "para jogar novamente"
                        ]
@@ -94,14 +94,28 @@ update seconds gameState =  if (gameOver)
                        else getScore gameState
 
 handleKeys :: Event -> GameState -> GameState
-handleKeys (EventKey (SpecialKey KeyLeft ) Down _ _) gameState = changeDirection gameState LEFT
-handleKeys (EventKey (SpecialKey KeyRight) Down _ _) gameState = changeDirection gameState RIGHT 
-handleKeys (EventKey (SpecialKey KeyUp   ) Down _ _) gameState = changeDirection gameState UP 
-handleKeys (EventKey (SpecialKey KeyDown ) Down _ _) gameState = changeDirection gameState DOWN 
-handleKeys (EventKey (SpecialKey KeySpace) Down _ _) gameState =    if (isGameOver gameState)
-                                                                    then initialGameState False
-                                                                    else gameState
+handleKeys (EventKey (SpecialKey KeyLeft ) Down _ _) gameState = handleDirectionChange gameState LEFT
+handleKeys (EventKey (SpecialKey KeyRight) Down _ _) gameState = handleDirectionChange gameState RIGHT
+handleKeys (EventKey (SpecialKey KeyUp   ) Down _ _) gameState = handleDirectionChange gameState UP
+handleKeys (EventKey (SpecialKey KeyDown ) Down _ _) gameState = handleDirectionChange gameState DOWN
+handleKeys (EventKey (SpecialKey KeySpace) Down _ _) gameState
+    | isGameOver gameState = initialGameState False
+    | otherwise = gameState
 handleKeys _ gameState = gameState
+
+handleDirectionChange :: GameState -> Direction -> GameState
+handleDirectionChange gameState newDir
+    | newDir /= oppositeDir = changeDirection gameState newDir
+    | otherwise = gameState
+    where
+        currentDir = getDirection gameState
+        oppositeDir = case currentDir of
+            UP -> DOWN
+            DOWN -> UP
+            LEFT -> RIGHT
+            RIGHT -> LEFT
+
+
 
 main :: IO ()
 main = play window background 10 (initialGameState False) render handleKeys update
