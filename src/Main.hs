@@ -118,4 +118,4 @@ handleDirectionChange gameState newDir
 
 
 main :: IO ()
-main = play window background 10 (initialGameState False) render handleKeys update
+main = play window background 8 (initialGameState False) render handleKeys update
