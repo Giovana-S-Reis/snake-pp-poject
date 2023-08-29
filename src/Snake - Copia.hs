@@ -42,22 +42,21 @@ data GameState = GameState      { getSnake :: Snake
                                 , getDirection :: Direction
                                 , isGameOver :: Bool
                                 , getRandomStdGen :: StdGen 
-								, getScore :: Int }
+								, getScore :: Int 
+								, isInitialScreen :: Bool
+								, isSpacePressed :: Bool }
 
 changeDirection :: GameState -> Direction -> GameState
-changeDirection (GameState s f d g r score) newDir = GameState s f newDir g r (getScore gameState)
-    where gameState = GameState s f newDir g r score
+changeDirection (GameState s f d g r score isInit isSpace) newDir =
+    GameState s f newDir g r score isInit isSpace
 
 
-initialGameState gameOver = GameState   { getSnake = [  (snakeX, snakeY), 
-                                                        (snakeX, snakeY - 1), 
-                                                        (snakeX, snakeY - 2), 
-                                                        (snakeX - 1, snakeY - 2), 
-                                                        (snakeX - 2, snakeY - 2)]
-                                        , getFood = (3, 3)
-                                        , getDirection = DOWN
-                                        , isGameOver = gameOver
-                                        , getRandomStdGen = mkStdGen 100 
-										, getScore = 0 }
-        where   snakeX = cols `div` 2
-                snakeY = rows `div` 2
+
+
+initialGameState gameOver = GameState { getSnake = []
+                                      , getFood = (0, 0)
+                                      , getDirection = DOWN
+                                      , isGameOver = gameOver
+                                      , getRandomStdGen = mkStdGen 100 
+                                      , getScore = 0
+                                      , isInitialScreen = True }
