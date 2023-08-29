@@ -6,17 +6,17 @@ import Graphics.Gloss.Interface.Pure.Game
 import Debug.Trace
 
 window :: Display
-window = InWindow "Haskell Snake Game" (640, 480) (100, 100)
+window = InWindow "Cobraskell" (800, 600) (100, 100)
 
 background :: Color
 background = white
 
 render :: GameState -> Picture
-render gameState = pictures $   [ fillRectangle black (16, 0) (640, 20)
-                                , fillRectangle black (16, 24) (640, 20)
-                                , fillRectangle black (0, 12) (20, 480)
-                                , fillRectangle black (32, 12) (20, 480) ] ++
-                                  fmap (convertToPicture black) snake ++ 
+render gameState = pictures $   [ fillRectangle black (16, 0) (660, 20)
+                                , fillRectangle black (16, 24) (660, 20)
+                                , fillRectangle black (0, 12) (20, 500)
+                                , fillRectangle black (32, 12) (20, 500) ] ++
+                                  fmap (convertToPicture red) snake ++ 
                                   fmap (convertToPicture blue) [food] ++
                                   gameOverPicture
     where   snake = getSnake gameState 
@@ -34,9 +34,9 @@ render gameState = pictures $   [ fillRectangle black (16, 0) (640, 20)
                                         scale 0.5 0.5 $ 
                                         text "GAME OVER"
                                      ,  color blue $ 
-                                        translate (-175) (-50) $ 
+                                        translate (-230) (-50) $ 
                                         scale 0.2 0.2 $ 
-                                        text "Press SPACE to try again." ] 
+                                        text "Pressione SPACE para tentar denovo" ] 
                                 else []
                                                         
 update :: Float -> GameState -> GameState
@@ -56,15 +56,27 @@ update seconds gameState =  if (gameOver)
             newGameOver = checkGameOver newSnake
 
 handleKeys :: Event -> GameState -> GameState
-handleKeys (EventKey (SpecialKey KeyLeft ) Down _ _) gameState = changeDirection gameState LEFT
-handleKeys (EventKey (SpecialKey KeyRight) Down _ _) gameState = changeDirection gameState RIGHT 
-handleKeys (EventKey (SpecialKey KeyUp   ) Down _ _) gameState = changeDirection gameState UP 
-handleKeys (EventKey (SpecialKey KeyDown ) Down _ _) gameState = changeDirection gameState DOWN 
-handleKeys (EventKey (SpecialKey KeySpace) Down _ _) gameState =    if (isGameOver gameState)
-                                                                    then initialGameState False
-                                                                    else gameState
+handleKeys (EventKey (SpecialKey KeyLeft ) Down _ _) gameState = handleDirectionChange gameState LEFT
+handleKeys (EventKey (SpecialKey KeyRight) Down _ _) gameState = handleDirectionChange gameState RIGHT
+handleKeys (EventKey (SpecialKey KeyUp   ) Down _ _) gameState = handleDirectionChange gameState UP
+handleKeys (EventKey (SpecialKey KeyDown ) Down _ _) gameState = handleDirectionChange gameState DOWN
+handleKeys (EventKey (SpecialKey KeySpace) Down _ _) gameState
+    | isGameOver gameState = initialGameState False
+    | otherwise = gameState
 handleKeys _ gameState = gameState
 
+handleDirectionChange :: GameState -> Direction -> GameState
+handleDirectionChange gameState newDir
+    | newDir /= oppositeDir = changeDirection gameState newDir
+    | otherwise = gameState
+    where
+        currentDir = getDirection gameState
+        oppositeDir = case currentDir of
+            UP -> DOWN
+            DOWN -> UP
+            LEFT -> RIGHT
+            RIGHT -> LEFT
+
 main :: IO ()
-main = play window background 10 (initialGameState True) render handleKeys update
+main = play window background 8 (initialGameState False) render handleKeys update
 
